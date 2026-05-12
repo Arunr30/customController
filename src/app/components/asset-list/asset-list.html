@@ -1,19 +1,20 @@
 <div
   class="asset-container"
   cdkDropList
+  id="assetList"
   [cdkDropListData]="assets"
+  [cdkDropListConnectedTo]="locationIds"
+  (cdkDropListDropped)="drop($event)"
 >
 
   <div
     class="asset-card"
-    *ngFor="let asset of assets"
+    *ngFor="let asset of assets; trackBy: trackByAsset"
     cdkDrag
   >
-
     <div class="asset-name">
       {{ asset.assestName }}
     </div>
-
   </div>
 
 </div>

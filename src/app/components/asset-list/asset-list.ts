@@ -1,6 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { Asset } from '../../models/asset';
 import { AssetService } from '../../services/asset';
@@ -13,20 +13,23 @@ import { AssetService } from '../../services/asset';
   styleUrls: ['./asset-list.css'],
 })
 export class AssetList implements OnInit {
-
   assets: Asset[] = [];
 
-  constructor(
-    private assetList: AssetService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  locationIds: string[] = [];
+
+  constructor(private assetService: AssetService) {}
 
   ngOnInit(): void {
-    this.assetList.getAssetsList().subscribe((res) => {
-      this.assets = res;
-
-      // 👇 THIS FIXES NG0100
-      this.cdr.detectChanges();
+    this.assetService.getAssetsList().subscribe((res) => {
+      this.assets = res ?? [];
     });
+  }
+
+  drop(event: CdkDragDrop<Asset[]>) {
+    moveItemInArray(this.assets, event.previousIndex, event.currentIndex);
+  }
+
+  trackByAsset(index: number, item: Asset) {
+    return item.assestId;
   }
 }

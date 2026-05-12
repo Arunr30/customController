@@ -1,52 +1,43 @@
 .asset-container {
   width: 240px;
-  height: 340px;
-
+  min-height: 340px;
   padding: 18px;
-
   background: #f8f5ed;
   border: 2px solid #d7c58c;
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .asset-card {
   background: #e7f1fb;
   border: 2px solid #6aa3e8;
   border-radius: 6px;
-
   padding: 14px;
-  margin-bottom: 14px;
-
   cursor: grab;
-
   user-select: none;
-
-  transition: box-shadow 0.10s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 .asset-card:hover {
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
 .asset-card:active {
   cursor: grabbing;
 }
 
-/* DRAG PERFORMANCE FIX */
-
-.cdk-drag-preview {
-  border-radius: 6px;
-
-  background: #e7f1fb;
-  border: 2px solid #6aa3e8;
-
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
-}
 
 .cdk-drag-placeholder {
   opacity: 0;
 }
 
-.cdk-drag-animating {
-  transition: none;
+.cdk-drag-preview {
+  background: #e7f1fb;
+  border: 2px solid #6aa3e8;
+  border-radius: 6px;
+  padding: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }

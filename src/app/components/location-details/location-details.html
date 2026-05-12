@@ -1,31 +1,30 @@
-<div class="location-container">
+<div class="location-container" cdkDropListGroup>
 
-  <div class="location-row" *ngFor="let location of locations">
+  <div *ngFor="let loc of locations$ | async" class="location-row">
 
     <div class="location-card">
-      {{ location.locationName }}
+      {{ loc.locationName }}
     </div>
 
     <div
-      class="allocation-panel"
       cdkDropList
-      [cdkDropListData]="location.assignedAssets"
+      [id]="loc.locationId"
+      [cdkDropListData]="loc.assignedAssets"
+      [cdkDropListConnectedTo]="locationIds.concat(['assetList'])"
+      class="drop-zone"
       (cdkDropListDropped)="drop($event)"
     >
 
       <div
-        class="asset-card"
-        *ngFor="let asset of location.assignedAssets"
+        *ngFor="let asset of loc.assignedAssets"
         cdkDrag
+        class="asset-item"
       >
-        {{ asset.assestName }}
+        {{ asset.assetName }}
       </div>
 
-      <div
-        class="drop-placeholder"
-        *ngIf="location.assignedAssets?.length === 0"
-      >
-        DROP HERE
+      <div class="drop-placeholder" *ngIf="!loc.assignedAssets?.length">
+        Drop assets here
       </div>
 
     </div>
