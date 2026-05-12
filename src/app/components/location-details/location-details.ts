@@ -32,15 +32,12 @@ export class LocationDetails implements OnInit {
  
       this.assets = res.assets;
  
-      // 🔥 LOAD FROM LOCALSTORAGE FIRST (ADDED)
       const saved = localStorage.getItem('locations');
       const localData = saved ? JSON.parse(saved) : null;
  
       this.locations = res.locations.map((loc: any) => {
  
         let assignedAssets: any[] = [];
- 
-        // 🔥 PRIORITY: LOCALSTORAGE DATA (ADDED)
         const storedLoc = localData?.find((l: any) => l.locationId === loc.locationId);
  
         if (storedLoc?.assignedAssets) {
@@ -74,25 +71,19 @@ export class LocationDetails implements OnInit {
     location: any,
   ) {
     if (event.previousContainer !== event.container) {
- 
-      // UI UPDATE
+
       copyArrayItem(
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
         event.currentIndex,
       );
- 
-      // DRAGGED ASSET
       const draggedAsset = event.previousContainer.data[event.previousIndex];
- 
-      // API PAYLOAD
       const payload = {
         locationId: location.locationId,
         assetId: draggedAsset.id,
       };
- 
-      // SAVE API
+
       this.location.mapAssetToLocation(payload).subscribe({
         next: (res: any) => {
  

@@ -46,4 +46,9 @@ export class LocationService {
       payload,
     );
   }
+
+
+  updateMappedAssets(payload: any) {
+  return this.http.put('/location/map-assets', payload);
+}
 }
