@@ -1,21 +1,53 @@
 import { Component, OnInit } from '@angular/core';
-import { Location } from '../../models/locationModel';
-import { LocationService } from '../../services/location-service';
-import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+
+import {
+  CdkDragDrop,
+  DragDropModule,
+  transferArrayItem
+} from '@angular/cdk/drag-drop';
+
+import { LocationService } from '../../services/location-service';
 
 @Component({
   selector: 'app-location-details',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, DragDropModule],
   templateUrl: './location-details.html',
   styleUrl: './location-details.css',
 })
 export class LocationDetails implements OnInit {
-  location$!: Observable<Location[]>;
 
-  constructor(private location : LocationService){}
+  locations: any[] = [];
+
+  constructor(private location: LocationService) {}
 
   ngOnInit(): void {
-    this.location$ = this.location.getLocation()
+
+    this.location.getLocation().subscribe((res: any) => {
+
+      this.locations = res.map((loc: any) => ({
+        ...loc,
+        assignedAssets: []
+      }));
+
+    });
+
   }
+
+  drop(event: CdkDragDrop<any[]>) {
+
+    if (event.previousContainer !== event.container) {
+
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+    }
+
+  }
+
 }

@@ -1,10 +1,14 @@
-<div class="asset-container">
+<div
+  class="asset-container"
+  cdkDropList
+  [cdkDropListData]="assets"
+>
 
-  <div class="panel-title">
-    Assets
-  </div>
-
-  <div class="asset-card" *ngFor="let asset of assets$ | async">
+  <div
+    class="asset-card"
+    *ngFor="let asset of assets"
+    cdkDrag
+  >
 
     <div class="asset-name">
       {{ asset.assestName }}
