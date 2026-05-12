@@ -1,9 +1,11 @@
 <div class="asset-container">
-  @for (asset of assets; track asset.assestId) {
-    <div class="asset-card">
-      <div class="asset-name">
-        {{ asset.assestName }}
-      </div>
+
+  <div class="asset-card" *ngFor="let asset of assets$ | async">
+    
+    <div class="asset-name">
+      {{ asset.assestName }}
     </div>
-  }
+
+  </div>
+
 </div>

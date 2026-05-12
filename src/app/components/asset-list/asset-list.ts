@@ -1,27 +1,24 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
+
 import { Asset } from '../../models/asset';
 import { AssetService } from '../../services/asset';
 
 @Component({
   selector: 'app-asset-list',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './asset-list.html',
-  styleUrl: './asset-list.css',
+  styleUrls: ['./asset-list.css'],
 })
-export class AssetList implements OnInit{
-  assets: Asset[] = []
+export class AssetList implements OnInit {
 
-  constructor(private assetList: AssetService){}
+  assets$!: Observable<Asset[]>;
+
+  constructor(private assetList: AssetService) {}
 
   ngOnInit(): void {
-    this.getAssets()
-  }
-
-  getAssets() {
-    this.assetList.getAssetsList().subscribe((res: any) => {
-      console.log(res);
-      
-      this.assets = res
-    })
+    this.assets$ = this.assetList.getAssetsList();
   }
 }

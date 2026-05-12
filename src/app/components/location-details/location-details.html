@@ -1,0 +1,11 @@
+<div class="location-container">
+
+  <div class="location-card" *ngFor="let location of location$ | async">
+    
+    <div class="location-name">
+      {{ location.locationName }}
+    </div>
+
+  </div>
+
+</div>
