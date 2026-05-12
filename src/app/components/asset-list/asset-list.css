@@ -1,0 +1,29 @@
+.asset-container{
+  padding: 20px;
+  background: #f5f2e9;
+  border: 2px solid #d8c58b;
+  width: 220px;
+  min-height: 350px;
+}
+ 
+.asset-card{
+  background: #e8f1fb;
+  border: 2px solid #6aa3e8;
+  border-radius: 4px;
+  padding: 14px 12px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+ 
+.asset-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+ 
+.asset-name{
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f1f1f;
+  text-align: center;
+}
