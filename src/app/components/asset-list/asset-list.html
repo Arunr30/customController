@@ -1,7 +1,11 @@
 <div class="asset-container">
 
+  <div class="panel-title">
+    Assets
+  </div>
+
   <div class="asset-card" *ngFor="let asset of assets$ | async">
-    
+
     <div class="asset-name">
       {{ asset.assestName }}
     </div>
