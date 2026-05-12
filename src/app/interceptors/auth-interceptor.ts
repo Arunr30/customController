@@ -35,6 +35,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     };
   }
 
+   if (req.url.includes('mapAssestsToLocation')) {
+    console.log(req.url);
+
+    if (req.url.includes('getLocationDetails')) {
+      console.log('LOCATION INTERCEPTOR HIT');
+    }
+    headers = {
+      ...headers,
+      clientSecret: 'e2db4b57-4ac8-cc22-8a31-cb86339f1459',
+      apikey:
+        'eyJraWQiOiJNUUtZMGNhZ1N0Tjl3QXAwTzd3WWZ2MXdTYnVjOFhROHZwbUQ3RXU5b0QwPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJmM2E0YzgwMi1iMGExLTcwNTEtYmJkZi1kZGI4N2M1YzAzOTkiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LWNlbnRyYWwtMS5hbWF6b25hd3MuY29tXC9ldS1jZW50cmFsLTFfSERyTEdkNDFWIiwiY29nbml0bzp1c2VybmFtZSI6ImFydW52YXN1LmFpQGdtYWlsLmNvbSIsIm9yaWdpbl9qdGkiOiJiZDAzY2MyZS04NzRmLTRiNDYtYjUwNC04ODIxM2I2YjA5MmMiLCJhdWQiOiIzdmo1MG5vMTBndGI4Mm81aWpqMmNkdXZ2MCIsImV2ZW50X2lkIjoiM2NhMGZmMDgtYWI0Mi00M2Q0LWE1ZGYtNTY3ZmQ2YmZlZDQ1IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3Nzg1NTc0MzAsImV4cCI6MTc3ODYzNzc3MCwiaWF0IjoxNzc4NTU3NDMwLCJqdGkiOiI0MjhiMzEyMS1jMDk5LTQxMzktYjVhMi02ZmE1ZWYxMDk3MWEiLCJlbWFpbCI6ImFydW52YXN1LmFpQGdtYWlsLmNvbSJ9.ZUwJTriaCqKpnPYITMPq3IMpvlK6rUqeMbmNfnXtN5UzIEQcod8pdbF10QMLbsEjjbPR5-TZ0MUigj4IguvOUboc_WSN83v-0HgCNXhh_ymbv31A2U-8FdC__pgPZVvflcqy9znvw8I9lEz4Gv9G4IkW3dRvKk1OKzn-x-RoU4lawxd9Tui2ngYSmwgv_eoJvplz8PMF9d0QRVnX6YR4EGq-_J7-lZZQn_ObOPrrwsTdz09GPTo0C2eU3m8dzmpU9t7-fURotmuYxZw_J8NvYjccXSkWcS3S8WlBevIB6cA9U27FsFcjufptE-mtY7X0RwB0WIHiCD7wdzLHEUyysw',
+    };
+  }
+
   const modifiedReq = req.clone({
     setHeaders: headers,
   });
