@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
- 
+import { Observable } from 'rxjs';
+
 import { Asset } from '../../models/asset';
 import { AssetService } from '../../services/asset';
- 
+
 @Component({
   selector: 'app-asset-list',
   standalone: true,
@@ -12,22 +13,12 @@ import { AssetService } from '../../services/asset';
   templateUrl: './asset-list.html',
   styleUrls: ['./asset-list.css'],
 })
-export class AssetList implements OnInit {
- 
-  assets: Asset[] = [];
- 
-  constructor(
-    private assetList: AssetService,
-    private cdr: ChangeDetectorRef
-  ) {}
- 
-  ngOnInit(): void {
-    this.assetList.getAssetsList().subscribe((res) => {
-      this.assets = res;
- 
-      
-      this.cdr.detectChanges();
-    });
+export class AssetList {
+
+  
+  assets$: Observable<Asset[]>;
+
+  constructor(private assetService: AssetService) {
+    this.assets$ = this.assetService.getAssetsList();
   }
 }
- 
