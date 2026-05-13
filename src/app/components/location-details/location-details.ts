@@ -8,6 +8,7 @@ import {
 } from '@angular/cdk/drag-drop';
 
 import { forkJoin } from 'rxjs';
+
 import { LocationService } from './location-service';
 import { AssetService } from '../../services/asset';
 import { Location } from '../../models/locationModel';
@@ -38,7 +39,7 @@ export class LocationDetails implements OnInit {
     forkJoin({
       locations: this.location.getLocation(),
       assets: this.assetService.getAssetsList(),
-    }).subscribe((res) => {
+    }).subscribe((res: any) => {
       this.assets = res.assets;
       const saved = localStorage.getItem('locations');
       const localData = saved ? JSON.parse(saved) : [];
@@ -50,9 +51,7 @@ export class LocationDetails implements OnInit {
         } else if (loc.mapAsset) {
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
           ids.forEach((id: string) => {
-            const matchedAsset = this.assets.find(
-              (asset: Asset) => asset.assestId.toString() === id,
-            );
+            const matchedAsset = this.assets.find((asset: any) => asset.id.toString() === id);
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
@@ -67,26 +66,22 @@ export class LocationDetails implements OnInit {
     });
   }
 
-  drop(event: CdkDragDrop<any[]>, location: Location) {
+  drop(event: CdkDragDrop<any[]>, location: any) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       localStorage.setItem('locations', JSON.stringify(this.locations));
       return;
     }
     const draggedAsset = event.item.data;
-    const alreadyExists = this.locations.some((loc: Location) =>
-      loc.assignedAssets?.some((asset: Asset) => asset.assestId === draggedAsset.assestId),
+    const alreadyExists = this.locations.some((loc: any) =>
+      loc.assignedAssets?.some((asset: any) => asset.id === draggedAsset.id),
     );
-
     if (alreadyExists) {
       return;
     }
-    copyArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
+    const copiedAsset = event.previousContainer.data[event.previousIndex];
+
+    event.container.data.unshift(copiedAsset);
 
     const payload = {
       locationId: location.locationId,
@@ -96,7 +91,6 @@ export class LocationDetails implements OnInit {
     this.location.mapAssetToLocation(payload).subscribe({
       next: (res: any) => {
         console.log('MAPPED SUCCESS', res);
-
         localStorage.setItem('locations', JSON.stringify(this.locations));
       },
 
@@ -108,15 +102,15 @@ export class LocationDetails implements OnInit {
   }
 
   // UNMAP ASSET FROM LOCATION
-  removeAsset(location: Location, asset: Asset) {
+  removeAsset(location: any, asset: any) {
     const backup = [...location.assignedAssets];
     location.assignedAssets = location.assignedAssets.filter(
-      (a: Asset) => a.assestId !== asset.assestId,
+      (a: Asset) => a.assetId !== asset.assetId,
     );
     localStorage.setItem('locations', JSON.stringify(this.locations));
     const payload = {
       locationId: location.locationId,
-      assetId: asset.assestId,
+      assetId: asset.id,
     };
     this.location.removeAssetFromLocation(payload).subscribe({
       next: (res: any) => {

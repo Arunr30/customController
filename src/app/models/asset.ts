@@ -1,6 +1,6 @@
 export interface Asset {
-  assestId: any;
-  assestName: string;
+  assetId: any;
+  assetName: string;
   locationId?: string; 
   isAssigned?: boolean;
 
