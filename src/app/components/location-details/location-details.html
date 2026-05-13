@@ -6,7 +6,7 @@
       {{ location.locationName }}
     </div>
 
-    
+    <!-- DROP ZONE -->
 
     <div
       class="allocation-panel"
@@ -16,8 +16,19 @@
     >
       <!-- ASSIGNED ASSETS -->
 
-      <div class="asset-card" *ngFor="let asset of location.assignedAssets" cdkDrag>
-        {{ asset.assestName }}
+      <div
+        class="asset-card"
+        *ngFor="let asset of location.assignedAssets"
+        cdkDrag
+        [cdkDragData]="asset"
+      >
+        <span>
+          {{ asset.assestName }}
+        </span>
+
+        <!-- DELETE BUTTON -->
+
+        <button class="delete-btn" (click)="removeAsset(location, asset)">×</button>
       </div>
 
       <!-- EMPTY MESSAGE -->

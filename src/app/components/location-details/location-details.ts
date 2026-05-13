@@ -42,23 +42,29 @@ export class LocationDetails implements OnInit {
         const storedLoc = localData.find((l: any) => l.locationId === loc.locationId);
         if (storedLoc?.assignedAssets?.length) {
           assignedAssets = storedLoc.assignedAssets;
-        } else if (loc.mapAsset) {
+        }
+        else if (loc.mapAsset) {
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
+
           ids.forEach((id: string) => {
             const matchedAsset = this.assets.find((asset: any) => asset.id.toString() === id);
+
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
           });
         }
+
         return {
           ...loc,
           assignedAssets,
         };
       });
+
       this.cdr.detectChanges();
     });
   }
+
 
   drop(event: CdkDragDrop<any[]>, location: any) {
     if (event.previousContainer === event.container) {
@@ -66,13 +72,13 @@ export class LocationDetails implements OnInit {
       localStorage.setItem('locations', JSON.stringify(this.locations));
       return;
     }
-
     const draggedAsset = event.item.data;
     const alreadyExists = location.assignedAssets.some(
       (asset: any) => asset.id === draggedAsset.id,
     );
+
     if (alreadyExists) {
-      console.log('ASSET ALREADY EXISTS IN THIS LOCATION');
+      console.log('ASSET ALREADY EXISTS');
 
       return;
     }
@@ -83,6 +89,7 @@ export class LocationDetails implements OnInit {
       event.previousIndex,
       event.currentIndex,
     );
+
     const payload = {
       locationId: location.locationId,
       assetId: draggedAsset.id,
@@ -91,11 +98,32 @@ export class LocationDetails implements OnInit {
     this.location.mapAssetToLocation(payload).subscribe({
       next: (res: any) => {
         console.log('MAPPED SUCCESS', res);
+
         localStorage.setItem('locations', JSON.stringify(this.locations));
       },
+
       error: (err) => {
         console.log('API ERROR', err);
         location.assignedAssets.splice(event.currentIndex, 1);
+      },
+    });
+  }
+  removeAsset(location: any, asset: any) {
+    const backup = [...location.assignedAssets];
+    location.assignedAssets = location.assignedAssets.filter((a: any) => a.id !== asset.id);
+    localStorage.setItem('locations', JSON.stringify(this.locations));
+    const payload = {
+      locationId: location.locationId,
+      assetId: asset.id,
+    };
+    this.location.removeAssetFromLocation(payload).subscribe({
+      next: (res: any) => {
+        console.log('DELETE SUCCESS', res);
+      },
+
+      error: (err) => {
+        console.log('DELETE ERROR', err);
+        location.assignedAssets = backup;
       },
     });
   }
