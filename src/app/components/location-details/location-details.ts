@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import {
   CdkDragDrop,
   DragDropModule,
-  copyArrayItem,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 
