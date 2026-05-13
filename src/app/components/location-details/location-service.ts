@@ -20,7 +20,7 @@ export class LocationService {
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Location } from '../models/locationModel';
+import { Location } from '../../models/locationModel';
 
 @Injectable({
   providedIn: 'root',

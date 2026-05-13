@@ -9,7 +9,7 @@ import {
 
 import { forkJoin } from 'rxjs';
 
-import { LocationService } from '../../services/location-service';
+import { LocationService } from './location-service';
 import { AssetService } from '../../services/asset';
 import { Location } from '../../models/locationModel';
 import { Asset } from '../../models/asset';
@@ -32,6 +32,10 @@ export class LocationDetails implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  public loadInitialData() {
     forkJoin({
       locations: this.location.getLocation(),
       assets: this.assetService.getAssetsList(),
@@ -47,26 +51,21 @@ export class LocationDetails implements OnInit {
         }
         else if (loc.mapAsset) {
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
-
           ids.forEach((id: string) => {
             const matchedAsset = this.assets.find((asset: any) => asset.id.toString() === id);
-
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
           });
         }
-
         return {
           ...loc,
           assignedAssets,
         };
       });
-
       this.cdr.detectChanges();
-    });
+    });  
   }
-
 
   drop(event: CdkDragDrop<any[]>, location: any) {
     if (event.previousContainer === event.container) {
@@ -80,11 +79,8 @@ export class LocationDetails implements OnInit {
     );
 
     if (alreadyExists) {
-      console.log('ASSET ALREADY EXISTS');
-
       return;
     }
-
     copyArrayItem(
       event.previousContainer.data,
       event.container.data,
@@ -130,5 +126,9 @@ export class LocationDetails implements OnInit {
         location.assignedAssets = backup;
       },
     });
+  }
+
+  ngOnDestroy() {
+    localStorage.removeItem('locations');
   }
 }
