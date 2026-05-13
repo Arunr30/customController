@@ -1,3 +1,5 @@
+// location-details.ts
+
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -40,90 +42,102 @@ export class LocationDetails implements OnInit {
       assets: this.assetService.getAssetsList(),
     }).subscribe((res: any) => {
       this.assets = res.assets;
-      const saved = localStorage.getItem('locations');
-      const localData = saved ? JSON.parse(saved) : [];
+
       this.locations = res.locations.map((loc: any) => {
-        let assignedAssets: any[] = [];
-        const storedLoc = localData.find((l: any) => l.locationId === loc.locationId);
-        if (storedLoc?.assignedAssets?.length) {
-          assignedAssets = storedLoc.assignedAssets;
-        } else if (loc.mapAsset) {
+        let assignedAssets: Asset[] = [];
+
+        if (loc.mapAsset) {
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
+
           ids.forEach((id: string) => {
-            const matchedAsset = this.assets.find((asset: any) => asset.id.toString() === id);
+            const matchedAsset = this.assets.find(
+              (asset: Asset) => asset.assetId.toString() === id,
+            );
+
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
           });
         }
+
         return {
           ...loc,
           assignedAssets,
         };
       });
+
       this.cdr.detectChanges();
     });
   }
 
-  drop(event: CdkDragDrop<any[]>, location: any) {
+  drop(event: CdkDragDrop<Asset[]>, location: Location) {
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      localStorage.setItem('locations', JSON.stringify(this.locations));
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+
       return;
     }
+
     const draggedAsset = event.item.data;
-    const alreadyExists = this.locations.some((loc: any) =>
-      loc.assignedAssets?.some((asset: any) => asset.id === draggedAsset.id),
+
+    const alreadyExists = this.locations.some((loc: Location) =>
+      loc.assignedAssets?.some(
+        (asset: Asset) => asset.assetId === draggedAsset.assetId,
+      ),
     );
+
     if (alreadyExists) {
       return;
     }
-    const copiedAsset = event.previousContainer.data[event.previousIndex];
+
+    const copiedAsset =
+      event.previousContainer.data[event.previousIndex];
 
     event.container.data.unshift(copiedAsset);
 
     const payload = {
       locationId: location.locationId,
-      assetId: draggedAsset.id,
+      assetId: draggedAsset.assetId,
     };
 
     this.location.mapAssetToLocation(payload).subscribe({
-      next: (res: any) => {
+      next: (res: Response) => {
         console.log('MAPPED SUCCESS', res);
-        localStorage.setItem('locations', JSON.stringify(this.locations));
       },
 
-      error: (err) => {
+      error: (err: Error) => {
         console.log('API ERROR', err);
-        location.assignedAssets.splice(event.currentIndex, 1);
+
+        location.assignedAssets.splice(0, 1);
       },
     });
   }
 
-  // UNMAP ASSET FROM LOCATION
-  removeAsset(location: any, asset: any) {
+  removeAsset(location: Location, asset: Asset) {
     const backup = [...location.assignedAssets];
+
     location.assignedAssets = location.assignedAssets.filter(
       (a: Asset) => a.assetId !== asset.assetId,
     );
-    localStorage.setItem('locations', JSON.stringify(this.locations));
+
     const payload = {
       locationId: location.locationId,
-      assetId: asset.id,
+      assetId: asset.assetId,
     };
+
     this.location.removeAssetFromLocation(payload).subscribe({
-      next: (res: any) => {
+      next: (res: Response) => {
         console.log('DELETE SUCCESS', res);
       },
 
-      error: (err) => {
-        console.log('DELETE ERROR', err);
+      error: (err: Error) => {
+        console.log('DELETE ERROR', err.message);
+
         location.assignedAssets = backup;
       },
     });
-  }
-
-  ngOnDestroy() {
-    localStorage.removeItem('locations');
   }
 }

@@ -1,3 +1,5 @@
+// asset-list.ts
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -14,11 +16,15 @@ import { AssetService } from '../../services/asset';
   styleUrls: ['./asset-list.css'],
 })
 export class AssetList {
-
-  
   assets$: Observable<Asset[]>;
 
   constructor(private assetService: AssetService) {
-    this.assets$ = this.assetService.getAssetsList();
-  }
+
+  this.assets$ = this.assetService.getAssetsList();
+
+  this.assets$.subscribe((res) => {
+    console.log('ASSET RESPONSE', res);
+  });
+
+}
 }

@@ -1,12 +1,11 @@
+<!-- location-details.html -->
+
 <div class="location-container">
   <div class="location-row" *ngFor="let location of locations">
-    <!-- LOCATION NAME -->
 
     <div class="location-card">
       {{ location.locationName }}
     </div>
-
-    <!-- DROP ZONE -->
 
     <div
       class="allocation-panel"
@@ -14,8 +13,6 @@
       [cdkDropListData]="location.assignedAssets"
       (cdkDropListDropped)="drop($event, location)"
     >
-      <!-- ASSIGNED ASSETS -->
-
       <div
         class="asset-card"
         *ngFor="let asset of location.assignedAssets"
@@ -23,19 +20,20 @@
         [cdkDragData]="asset"
       >
         <span>
-          {{ asset.assestName }}
+          {{ asset.assetName }}
         </span>
 
-        <!-- DELETE BUTTON -->
-
-        <button class="delete-btn" (click)="removeAsset(location, asset)">×</button>
+        <button
+          class="delete-btn"
+          (click)="removeAsset(location, asset)"
+        >
+          ×
+        </button>
       </div>
-
-      <!-- EMPTY MESSAGE -->
 
       <div
         class="drop-placeholder"
-        *ngIf="!location.assignedAssets || location.assignedAssets.length === 0"
+        *ngIf="location.assignedAssets.length === 0"
       >
         DROP HERE
       </div>
