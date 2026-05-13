@@ -11,6 +11,8 @@ import { forkJoin } from 'rxjs';
 
 import { LocationService } from '../../services/location-service';
 import { AssetService } from '../../services/asset';
+import { Location } from '../../models/locationModel';
+import { Asset } from '../../models/asset';
 
 @Component({
   selector: 'app-location-details',
@@ -20,8 +22,8 @@ import { AssetService } from '../../services/asset';
   styleUrl: './location-details.css',
 })
 export class LocationDetails implements OnInit {
-  locations: any[] = [];
-  assets: any[] = [];
+  locations: Location[] = [];
+  assets: Asset[] = [];
 
   constructor(
     private location: LocationService,
@@ -108,6 +110,8 @@ export class LocationDetails implements OnInit {
       },
     });
   }
+
+  // UNMAP ASSET FROM LOCATION
   removeAsset(location: any, asset: any) {
     const backup = [...location.assignedAssets];
     location.assignedAssets = location.assignedAssets.filter((a: any) => a.id !== asset.id);
