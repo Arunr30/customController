@@ -44,20 +44,27 @@ export class LocationDetails implements OnInit {
       this.assets = res.assets;
 
       this.locations = res.locations.map((loc: any) => {
-        let assignedAssets: Asset[] = [];
+        const assignedAssets: Asset[] = [];
 
         if (loc.mapAsset) {
-          const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
+          const ids = loc.mapAsset
+            .split(',')
+            .map((id: string) => id.trim());
 
           ids.forEach((id: string) => {
             const matchedAsset = this.assets.find(
-              (asset: Asset) => asset.assetId.toString() === id,
+              (asset: Asset) =>
+                asset.assetId.toString() === id,
             );
 
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
           });
+
+          assignedAssets.sort((a: Asset, b: Asset) =>
+            a.assetName.localeCompare(b.assetName),
+          );
         }
 
         return {
@@ -70,7 +77,7 @@ export class LocationDetails implements OnInit {
     });
   }
 
-  drop(event: CdkDragDrop<Asset[]>, location: Location) {
+  drop(event: CdkDragDrop<Asset[]>, location: any) {
     if (event.previousContainer === event.container) {
       moveItemInArray(
         event.container.data,
@@ -81,11 +88,12 @@ export class LocationDetails implements OnInit {
       return;
     }
 
-    const draggedAsset = event.item.data;
+    const draggedAsset: Asset = event.item.data;
 
-    const alreadyExists = this.locations.some((loc: Location) =>
+    const alreadyExists = this.locations.some((loc: any) =>
       loc.assignedAssets?.some(
-        (asset: Asset) => asset.assetId === draggedAsset.assetId,
+        (asset: Asset) =>
+          asset.assetId === draggedAsset.assetId,
       ),
     );
 
@@ -96,7 +104,11 @@ export class LocationDetails implements OnInit {
     const copiedAsset =
       event.previousContainer.data[event.previousIndex];
 
-    event.container.data.unshift(copiedAsset);
+    event.container.data.push(copiedAsset);
+
+    event.container.data.sort((a: Asset, b: Asset) =>
+      a.assetName.localeCompare(b.assetName),
+    );
 
     const payload = {
       locationId: location.locationId,
@@ -104,24 +116,30 @@ export class LocationDetails implements OnInit {
     };
 
     this.location.mapAssetToLocation(payload).subscribe({
-      next: (res: Response) => {
+      next: (res: any) => {
         console.log('MAPPED SUCCESS', res);
       },
 
-      error: (err: Error) => {
+      error: (err: any) => {
         console.log('API ERROR', err);
 
-        location.assignedAssets.splice(0, 1);
+        location.assignedAssets =
+          location.assignedAssets.filter(
+            (asset: Asset) =>
+              asset.assetId !== draggedAsset.assetId,
+          );
       },
     });
   }
 
-  removeAsset(location: Location, asset: Asset) {
+  removeAsset(location: any, asset: Asset) {
     const backup = [...location.assignedAssets];
 
-    location.assignedAssets = location.assignedAssets.filter(
-      (a: Asset) => a.assetId !== asset.assetId,
-    );
+    location.assignedAssets =
+      location.assignedAssets.filter(
+        (a: Asset) =>
+          a.assetId !== asset.assetId,
+      );
 
     const payload = {
       locationId: location.locationId,
@@ -129,12 +147,12 @@ export class LocationDetails implements OnInit {
     };
 
     this.location.removeAssetFromLocation(payload).subscribe({
-      next: (res: Response) => {
+      next: (res: any) => {
         console.log('DELETE SUCCESS', res);
       },
 
-      error: (err: Error) => {
-        console.log('DELETE ERROR', err.message);
+      error: (err: any) => {
+        console.log('DELETE ERROR', err);
 
         location.assignedAssets = backup;
       },
