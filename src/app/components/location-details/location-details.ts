@@ -1,15 +1,7 @@
-// location-details.ts
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  CdkDragDrop,
-  DragDropModule,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
-
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
-
 import { LocationService } from './location-service';
 import { AssetService } from '../../services/asset';
 import { Location } from '../../models/locationModel';
@@ -27,7 +19,7 @@ export class LocationDetails implements OnInit {
   assets: Asset[] = [];
 
   constructor(
-    private location: LocationService,
+    private locationService: LocationService,
     private assetService: AssetService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -36,125 +28,124 @@ export class LocationDetails implements OnInit {
     this.loadInitialData();
   }
 
-  public loadInitialData() {
+  loadInitialData(): void {
     forkJoin({
-      locations: this.location.getLocation(),
+      locations: this.locationService.getLocation(),
       assets: this.assetService.getAssetsList(),
-    }).subscribe((res: any) => {
+    }).subscribe((res: { locations: Location[]; assets: Asset[] }) => {
       this.assets = res.assets;
 
       this.locations = res.locations.map((loc: any) => {
         const assignedAssets: Asset[] = [];
 
         if (loc.mapAsset) {
-          const ids = loc.mapAsset
-            .split(',')
-            .map((id: string) => id.trim());
+          const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
 
           ids.forEach((id: string) => {
             const matchedAsset = this.assets.find(
-              (asset: Asset) =>
-                asset.assetId.toString() === id,
+              (asset: Asset) => String(asset.id) === String(id),
             );
-
             if (matchedAsset) {
               assignedAssets.push(matchedAsset);
             }
           });
-
-          assignedAssets.sort((a: Asset, b: Asset) =>
-            a.assetName.localeCompare(b.assetName),
-          );
         }
 
-        return {
-          ...loc,
-          assignedAssets,
-        };
+        assignedAssets.sort((a: Asset, b: Asset) =>
+          a.assetName.localeCompare(b.assetName),
+        );
+
+        return { ...loc, assignedAssets };
       });
 
       this.cdr.detectChanges();
     });
   }
 
-  drop(event: CdkDragDrop<Asset[]>, location: any) {
+  drop(event: CdkDragDrop<Asset[]>, location: Location): void {
+    // Reorder within same container
     if (event.previousContainer === event.container) {
       moveItemInArray(
         event.container.data,
         event.previousIndex,
         event.currentIndex,
       );
-
       return;
     }
 
     const draggedAsset: Asset = event.item.data;
+    console.log('draggedAsset full object:', draggedAsset);
+console.log('assetId being sent:', draggedAsset.id);
 
-    const alreadyExists = this.locations.some((loc: any) =>
-      loc.assignedAssets?.some(
-        (asset: Asset) =>
-          asset.assetId === draggedAsset.assetId,
-      ),
+    // Prevent assigning an already allocated asset to any location
+    const alreadyAllocated = this.locations.some((loc: Location) =>
+      loc.assignedAssets?.some((asset: Asset) => asset.id === draggedAsset.id),
     );
 
-    if (alreadyExists) {
+    if (alreadyAllocated) {
       return;
     }
 
-    const copiedAsset =
-      event.previousContainer.data[event.previousIndex];
+    const copiedAsset: Asset = event.previousContainer.data[event.previousIndex];
 
-    event.container.data.push(copiedAsset);
-
-    event.container.data.sort((a: Asset, b: Asset) =>
+    // Optimistic UI update
+    location.assignedAssets = [...(location.assignedAssets || []), copiedAsset];
+    location.assignedAssets.sort((a: Asset, b: Asset) =>
       a.assetName.localeCompare(b.assetName),
     );
+    this.cdr.detectChanges();
 
     const payload = {
       locationId: location.locationId,
-      assetId: draggedAsset.assetId,
+      id: draggedAsset.id,
     };
 
-    this.location.mapAssetToLocation(payload).subscribe({
-      next: (res: any) => {
+    this.locationService.mapAssetToLocation(payload).subscribe({
+      next: (res: Response) => {
         console.log('MAPPED SUCCESS', res);
+        console.log('location object:', location);
+console.log('locationId being sent:', location.locationId);
+        // No reload needed — optimistic update is correct.
+        // On page refresh, backend returns updated mapAsset field.
+        
       },
-
-      error: (err: any) => {
-        console.log('API ERROR', err);
-
-        location.assignedAssets =
-          location.assignedAssets.filter(
-            (asset: Asset) =>
-              asset.assetId !== draggedAsset.assetId,
-          );
+      error: (err: Error) => {
+        console.error('MAP API ERROR', err);
+        // Rollback optimistic update
+        location.assignedAssets = location.assignedAssets.filter(
+          (a: Asset) => a.id !== copiedAsset.id,
+        );
+        this.cdr.detectChanges();
       },
     });
   }
 
-  removeAsset(location: any, asset: Asset) {
-    const backup = [...location.assignedAssets];
-
-    location.assignedAssets =
-      location.assignedAssets.filter(
-        (a: Asset) =>
-          a.assetId !== asset.assetId,
-      );
+  removeAsset(location: Location, asset: Asset): void {
+    // Optimistic UI update
+    location.assignedAssets = location.assignedAssets.filter(
+      (a: Asset) => a.id !== asset.id,
+    );
+    this.cdr.detectChanges();
 
     const payload = {
       locationId: location.locationId,
-      assetId: asset.assetId,
+      id: asset.id,
     };
 
-    this.location.removeAssetFromLocation(payload).subscribe({
-      next: (res: any) => {
+    this.locationService.removeAssetFromLocation(payload).subscribe({
+      next: (res: Response) => {
         console.log('DELETE SUCCESS', res);
+        // No reload needed — optimistic update is correct.
+        // On page refresh, backend returns updated mapAsset field.
       },
-
-      error: (err: any) => {
-        console.log('DELETE ERROR', err);
-
-        location.assignedAssets = backup;
+      error: (err: Error) => {
+        console.error('DELETE API ERROR', err);
+        // Rollback optimistic update
+        location.assignedAssets = [...location.assignedAssets, asset];
+        location.assignedAssets.sort((a: Asset, b: Asset) =>
+          a.assetName.localeCompare(b.assetName),
+        );
+        this.cdr.detectChanges();
       },
     });
   }

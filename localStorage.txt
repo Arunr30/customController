@@ -1,0 +1,136 @@
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+
+import { forkJoin } from 'rxjs';
+import { LocationService } from './location-service';
+import { AssetService } from '../../services/asset';
+import { Location } from '../../models/locationModel';
+import { Asset } from '../../models/asset';
+
+@Component({
+  selector: 'app-location-details',
+  standalone: true,
+  imports: [CommonModule, DragDropModule],
+  templateUrl: './location-details.html',
+  styleUrl: './location-details.css',
+})
+export class LocationDetails implements OnInit {
+  locations: Location[] = [];
+  assets: Asset[] = [];
+
+  constructor(
+    private location: LocationService,
+    private assetService: AssetService,
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  loadInitialData() {
+    forkJoin({
+      locations: this.location.getLocation(),
+      assets: this.assetService.getAssetsList(),
+    }).subscribe((res: { locations: Location[]; assets: Asset[] }) => {
+      this.assets = res.assets;
+      const savedMappings = JSON.parse(localStorage.getItem('locationMappings') || '{}');
+      this.locations = res.locations.map((loc: any) => {
+        const assignedAssets: Asset[] = [];
+
+        if (loc.mapAsset) {
+
+          const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
+          console.log(ids);
+          
+          ids.forEach((id: string) => {
+            const matchedAsset = this.assets.find((asset: Asset) => asset.id.toString() === id);
+
+            if (matchedAsset) {
+              assignedAssets.push(matchedAsset);
+            }
+          });
+        }
+
+        const localAssetIds = savedMappings[loc.locationId] || [];
+        localAssetIds.forEach((id: string) => {
+          const exists = assignedAssets.some((asset: Asset) => asset.id === id);
+          if (!exists) {
+            const matchedAsset = this.assets.find((asset: Asset) => asset.id === id);
+
+            if (matchedAsset) {
+              assignedAssets.push(matchedAsset);
+            }
+          }
+        });
+        assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
+        return {
+          ...loc,
+          assignedAssets,
+        };
+      });
+
+      this.cdr.detectChanges();
+    });
+  }
+
+  drop(event: CdkDragDrop<Asset[]>, location: Location) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+    const draggedAsset: Asset = event.item.data;
+    const alreadyAllocated = this.locations.some((loc: Location) =>
+      loc.assignedAssets?.some((asset: Asset) => asset.id === draggedAsset.id),
+    );
+    if (alreadyAllocated) {
+      return;
+    }
+    const copiedAsset = event.previousContainer.data[event.previousIndex];
+    event.container.data.push(copiedAsset);
+    event.container.data.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
+    const savedMappings = JSON.parse(localStorage.getItem('locationMappings') || '{}');
+
+    if (!savedMappings[location.locationId]) {
+      savedMappings[location.locationId] = [];
+    }
+    savedMappings[location.locationId].push(draggedAsset.id);
+    localStorage.setItem('locationMappings', JSON.stringify(savedMappings));
+    const payload = {
+      locationId: location.locationId,
+      assetId: draggedAsset.id,
+    };
+    this.location.mapAssetToLocation(payload).subscribe({
+      next: (res: Response) => {
+        console.log('MAPPED SUCCESS', res);
+      },
+      error: (err: Error) => {
+        console.log('API ERROR', err);
+      },
+    });
+  }
+
+  removeAsset(location: Location, asset: Asset) {
+    location.assignedAssets = location.assignedAssets.filter((a: Asset) => a.id !== asset.id);
+    const savedMappings = JSON.parse(localStorage.getItem('locationMappings') || '{}');
+    if (savedMappings[location.locationId]) {
+      savedMappings[location.locationId] = savedMappings[location.locationId].filter(
+        (id: string) => id !== asset.id,
+      );
+      localStorage.setItem('locationMappings', JSON.stringify(savedMappings));
+    }
+    const payload = {
+      locationId: location.locationId,
+      assetId: asset.id,
+    };
+    this.location.removeAssetFromLocation(payload).subscribe({
+      next: (res: Response) => {
+        console.log('DELETE SUCCESS', res);
+      },
+      error: (err: Error) => {
+        console.log('DELETE ERROR', err);
+      },
+    });
+  }
+}
