@@ -34,10 +34,8 @@ export class LocationDetails implements OnInit {
       assets: this.assetService.getAssetsList(),
     }).subscribe((res: { locations: Location[]; assets: Asset[] }) => {
       this.assets = res.assets;
-
-      this.locations = res.locations.map((loc: any) => {
+      this.locations = res.locations.map((loc: Location) => {
         const assignedAssets: Asset[] = [];
-
         if (loc.mapAsset) {
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
 
@@ -50,20 +48,16 @@ export class LocationDetails implements OnInit {
             }
           });
         }
-
         assignedAssets.sort((a: Asset, b: Asset) =>
           a.assetName.localeCompare(b.assetName),
         );
-
         return { ...loc, assignedAssets };
       });
-
       this.cdr.detectChanges();
     });
   }
 
   drop(event: CdkDragDrop<Asset[]>, location: Location): void {
-    // Reorder within same container
     if (event.previousContainer === event.container) {
       moveItemInArray(
         event.container.data,
@@ -75,9 +69,7 @@ export class LocationDetails implements OnInit {
 
     const draggedAsset: Asset = event.item.data;
     console.log('draggedAsset full object:', draggedAsset);
-console.log('assetId being sent:', draggedAsset.id);
-
-    // Prevent assigning an already allocated asset to any location
+    console.log('assetId being sent:', draggedAsset.id);
     const alreadyAllocated = this.locations.some((loc: Location) =>
       loc.assignedAssets?.some((asset: Asset) => asset.id === draggedAsset.id),
     );
@@ -87,8 +79,6 @@ console.log('assetId being sent:', draggedAsset.id);
     }
 
     const copiedAsset: Asset = event.previousContainer.data[event.previousIndex];
-
-    // Optimistic UI update
     location.assignedAssets = [...(location.assignedAssets || []), copiedAsset];
     location.assignedAssets.sort((a: Asset, b: Asset) =>
       a.assetName.localeCompare(b.assetName),
@@ -105,13 +95,10 @@ console.log('assetId being sent:', draggedAsset.id);
         console.log('MAPPED SUCCESS', res);
         console.log('location object:', location);
 console.log('locationId being sent:', location.locationId);
-        // No reload needed — optimistic update is correct.
-        // On page refresh, backend returns updated mapAsset field.
         
       },
       error: (err: Error) => {
         console.error('MAP API ERROR', err);
-        // Rollback optimistic update
         location.assignedAssets = location.assignedAssets.filter(
           (a: Asset) => a.id !== copiedAsset.id,
         );
@@ -121,7 +108,6 @@ console.log('locationId being sent:', location.locationId);
   }
 
   removeAsset(location: Location, asset: Asset): void {
-    // Optimistic UI update
     location.assignedAssets = location.assignedAssets.filter(
       (a: Asset) => a.id !== asset.id,
     );
@@ -135,12 +121,9 @@ console.log('locationId being sent:', location.locationId);
     this.locationService.removeAssetFromLocation(payload).subscribe({
       next: (res: Response) => {
         console.log('DELETE SUCCESS', res);
-        // No reload needed — optimistic update is correct.
-        // On page refresh, backend returns updated mapAsset field.
       },
       error: (err: Error) => {
         console.error('DELETE API ERROR', err);
-        // Rollback optimistic update
         location.assignedAssets = [...location.assignedAssets, asset];
         location.assignedAssets.sort((a: Asset, b: Asset) =>
           a.assetName.localeCompare(b.assetName),
