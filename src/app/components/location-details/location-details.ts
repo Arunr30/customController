@@ -21,7 +21,6 @@ export class LocationDetails implements OnInit {
   constructor(
     private locationService: LocationService,
     private assetService: AssetService,
-    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +52,7 @@ export class LocationDetails implements OnInit {
         );
         return { ...loc, assignedAssets };
       });
-      this.cdr.detectChanges();
+
     });
   }
 
@@ -83,7 +82,7 @@ export class LocationDetails implements OnInit {
     location.assignedAssets.sort((a: Asset, b: Asset) =>
       a.assetName.localeCompare(b.assetName),
     );
-    this.cdr.detectChanges();
+    // this.cdr.detectChanges();
 
     const payload = {
       locationId: location.locationId,
@@ -102,7 +101,7 @@ console.log('locationId being sent:', location.locationId);
         location.assignedAssets = location.assignedAssets.filter(
           (a: Asset) => a.id !== copiedAsset.id,
         );
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
     });
   }
@@ -111,7 +110,7 @@ console.log('locationId being sent:', location.locationId);
     location.assignedAssets = location.assignedAssets.filter(
       (a: Asset) => a.id !== asset.id,
     );
-    this.cdr.detectChanges();
+    // this.cdr.detectChanges();
 
     const payload = {
       locationId: location.locationId,
@@ -128,7 +127,7 @@ console.log('locationId being sent:', location.locationId);
         location.assignedAssets.sort((a: Asset, b: Asset) =>
           a.assetName.localeCompare(b.assetName),
         );
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
     });
   }
