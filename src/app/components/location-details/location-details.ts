@@ -19,7 +19,7 @@ export class LocationDetails implements OnInit {
   constructor(
     private locationService: LocationService,
     private assetService: AssetService,
-  ) {} 
+  ) {}
   ngOnInit(): void {
     this.loadInitialData();
   }
@@ -32,17 +32,8 @@ export class LocationDetails implements OnInit {
       this.locations = res.locations.map((loc: Location) => {
         const assignedAssets: Asset[] = [];
         if (loc.mapAsset) {
-          console.log(loc.mapAsset);
-
           const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
-
           ids.forEach((id: string) => {
-            console.log('MAP ID:', id);
-
-            console.log(
-              'MATCHED:',
-              this.assets.find((asset: Asset) => asset.id === id),
-            );
             const matchedAsset = this.assets.find(
               (asset: Asset) => asset.id?.trim().toLowerCase() === id.trim().toLowerCase(),
             );
@@ -61,7 +52,6 @@ export class LocationDetails implements OnInit {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
     }
-
     const draggedAsset: Asset = event.item.data;
     const alreadyAllocated = this.locations.some((loc: Location) =>
       loc.assignedAssets?.some((asset: Asset) => asset.id === draggedAsset.id),
@@ -73,11 +63,9 @@ export class LocationDetails implements OnInit {
     if (alreadyAllocated && !sourceContainsAsset) {
       return;
     }
-
     event.previousContainer.data.splice(event.previousIndex, 1);
     location.assignedAssets = [...(location.assignedAssets || []), draggedAsset];
     location.assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
-
     const payload = {
       locationId: location.locationId,
       id: draggedAsset.id,

@@ -14,13 +14,7 @@ export class LocationService {
 
   private removeAssetApi = `${environment.apiUrl}/devum/demo/deleteAssetsService`;
 
-  constructor(private http: HttpClient) {
-    console.log('ENVIRONMENT:', environment);
-
-    console.log('API URL:', environment.apiUrl);
-
-    console.log('Production Mode:', environment.production);
-  }
+  constructor(private http: HttpClient) {}
 
   getLocation(): Observable<Location[]> {
     return this.http.get<Location[]>(this.apiUrl);
