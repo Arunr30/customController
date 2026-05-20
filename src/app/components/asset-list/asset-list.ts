@@ -1,6 +1,4 @@
-// asset-list.ts
-
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Observable } from 'rxjs';
@@ -15,16 +13,22 @@ import { AssetService } from '../../services/asset';
   templateUrl: './asset-list.html',
   styleUrls: ['./asset-list.css'],
 })
-export class AssetList {
-  assets$: Observable<Asset[]>;
+export class AssetList implements OnInit {
 
-  constructor(private assetService: AssetService) {
+  assets$!: Observable<Asset[]>;
 
-  this.assets$ = this.assetService.getAssetsList();
+  constructor(private assetService: AssetService) {}
 
-  this.assets$.subscribe((res) => {
-    console.log('ASSET RESPONSE', res);
-  });
+  ngOnInit(): void {
 
-}
+    console.log('ASSET COMPONENT INIT');
+
+    this.assets$ = this.assetService.getAssetsList();
+
+    this.assets$.subscribe((res) => {
+
+      console.log('ASSET RESPONSE:', res);
+
+    });
+  }
 }

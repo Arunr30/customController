@@ -10,7 +10,7 @@
   gap: 12px;
   overflow-y: auto;
 }
-
+ 
 .asset-card {
   background: #e7f1fb;
   border: 2px solid #6aa3e8;
@@ -20,20 +20,20 @@
   user-select: none;
   transition: box-shadow 0.15s ease;
 }
-
+ 
 .asset-card:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
-
+ 
 .asset-card:active {
   cursor: grabbing;
 }
-
-
+ 
+ 
 .cdk-drag-placeholder {
   opacity: 0;
 }
-
+ 
 .cdk-drag-preview {
   background: #e7f1fb;
   border: 2px solid #6aa3e8;
@@ -41,3 +41,5 @@
   padding: 14px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
+ 
+ 

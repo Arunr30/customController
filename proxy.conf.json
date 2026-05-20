@@ -1,7 +1,7 @@
 {
   "/api": {
-    "target": "https://try.den.devum.com",
-    "secure": true,
+    "target": "http://192.168.1.185:7385",
+    "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
       "^/api": ""
