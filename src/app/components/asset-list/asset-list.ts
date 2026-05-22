@@ -20,15 +20,6 @@ export class AssetList implements OnInit {
   constructor(private assetService: AssetService) {}
 
   ngOnInit(): void {
-
-    console.log('ASSET COMPONENT INIT');
-
     this.assets$ = this.assetService.getAssetsList();
-
-    this.assets$.subscribe((res) => {
-
-      console.log('ASSET RESPONSE:', res);
-
-    });
   }
 }

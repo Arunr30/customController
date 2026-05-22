@@ -12,10 +12,7 @@ export class AssetService {
   private apiUrl =
     `${environment.apiUrl}/devum/demo/getAssestsDetails`;
 
-  constructor(private http: HttpClient) {
-
-    console.log('Asset API:', this.apiUrl);
-  }
+  constructor(private http: HttpClient) {}
 
   getAssetsList(): Observable<Asset[]> {
     return this.http.get<Asset[]>(this.apiUrl);

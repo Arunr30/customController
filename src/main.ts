@@ -3,6 +3,10 @@ import { createCustomElement } from '@angular/elements';
 import '@angular/compiler';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app';
+
+
+
+
 (async () => {
   const app = await createApplication(appConfig);
   const appElement =
@@ -17,3 +21,5 @@ import { AppComponent } from './app/app';
     );
   }
 })();
+
+

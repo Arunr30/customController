@@ -20,8 +20,9 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "external-den-core": "file:./dist/external-den-core",
     "dist-controller": "file:./dist/dist-controller",
+    "dotenv": "^17.4.2",
+    "external-den-core": "file:./dist/external-den-core",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -29,6 +30,7 @@
     "@angular/build": "^21.2.0",
     "@angular/cli": "^21.2.0",
     "@angular/compiler-cli": "^21.2.0",
+    "@types/node": "^25.9.1",
     "concat": "^1.0.3",
     "fs-extra": "^11.3.5",
     "jsdom": "^28.0.0",
