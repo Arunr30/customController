@@ -1,84 +1,136 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { forkJoin } from 'rxjs';
-import { LocationService } from './location-service';
-import { AssetService } from '../../services/asset';
-import { Location } from '../../models/locationModel';
+import { Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 import { Asset } from '../../models/asset';
+import { Location } from '../../models/locationModel';
+import { LocationService } from './location-service';
 
 @Component({
   selector: 'app-location-details',
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule],
   templateUrl: './location-details.html',
   styleUrls: ['./location-details.css'],
 })
 export class LocationDetails implements OnInit {
-  locations: Location[] = [];
-  assets: Asset[] = [];
-  constructor(
-    private locationService: LocationService,
-    private assetService: AssetService,
-  ) {}
+  locations$!: Observable<Location[]>;
+  @Input() isDragging = false;
+  constructor(private locationService: LocationService) {}
   ngOnInit(): void {
     this.loadInitialData();
   }
   loadInitialData(): void {
-    forkJoin({
-      locations: this.locationService.getLocation(),
-      assets: this.assetService.getAssetsList(),
-    }).subscribe((res: { locations: Location[]; assets: Asset[] }) => {
-      this.assets = res.assets;
-      this.locations = res.locations.map((loc: Location) => {
-        const assignedAssets: Asset[] = [];
-        if (loc.mapAsset) {
-          const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
-          ids.forEach((id: string) => {
-            const matchedAsset = this.assets.find(
-              (asset: Asset) => asset.id?.trim().toLowerCase() === id.trim().toLowerCase(),
+    this.locations$ = this.locationService.getLocation().pipe(
+      map((res: Location[]) => {
+        console.log('Locations:', res);
+        return res.map((loc: Location) => {
+          const assignedAssets: Asset[] = [];
+          if (loc.mapAsset) {
+            const ids = loc.mapAsset.split(',').map((id: string) => id.trim());
+            assignedAssets.push(
+              ...ids.map(
+                (id: string) =>
+                  ({
+                    id,
+                    assetName: id,
+                  }) as Asset,
+              ),
             );
-            if (matchedAsset) {
-              assignedAssets.push(matchedAsset);
-            }
-          });
-        }
-        assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
-        return { ...loc, assignedAssets };
-      });
-    });
+          }
+          assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
+          return { ...loc, assignedAssets };
+        });
+      }),
+      shareReplay(1),
+    );
   }
-  drop(event: CdkDragDrop<Asset[]>, location: Location): void {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      return;
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
     }
-    const draggedAsset: Asset = event.item.data;
-    const alreadyAllocated = this.locations.some((loc: Location) =>
-      loc.assignedAssets?.some((asset: Asset) => asset.id === draggedAsset.id),
-    );
-    const sourceContainsAsset = event.previousContainer.data.some(
-      (asset: Asset) => asset.id === draggedAsset.id,
-    );
+  }
 
-    if (alreadyAllocated && !sourceContainsAsset) {
+  drop(event: DragEvent, location: Location): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!event.dataTransfer) {
       return;
     }
-    event.previousContainer.data.splice(event.previousIndex, 1);
-    location.assignedAssets = [...(location.assignedAssets || []), draggedAsset];
-    location.assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
-    const payload = {
-      locationId: location.locationId,
-      id: draggedAsset.id,
+
+    let draggedAsset: Asset | null = null;
+    const assetData = event.dataTransfer.getData('application/drop-event-data');
+
+    if (assetData) {
+      console.log('Dragged Asset Data:', assetData);
+      draggedAsset = JSON.parse(assetData);
+    }
+
+    if (!draggedAsset) {
+      return;
+    }
+
+    // Add to target location
+    if (!location.assignedAssets.some((a: Asset) => a.id === draggedAsset!.id)) {
+      location.assignedAssets = [...(location.assignedAssets || []), draggedAsset];
+      location.assignedAssets.sort((a: Asset, b: Asset) => a.assetName.localeCompare(b.assetName));
+    }
+
+    console.log('Asset dropped:', draggedAsset, 'Location:', location);
+  }
+
+  onDragStart(event: DragEvent, item: any): void {
+    this.isDragging = true;
+    const mapperPayload = {
+      value: {
+        id: null,
+        dsName: null,
+        data: [
+          {
+            fieldName: 'is_drag_active',
+            originalValue: true,
+            value: true,
+            uom: {},
+            referenceData: {},
+          },
+        ],
+        fks: [],
+        isWsResult: false,
+        _isDirectValue: false,
+        dataStateType: 'INSERT',
+      },
     };
 
-    this.locationService.mapAssetToLocation(payload).subscribe({
-      error: () => {
-        location.assignedAssets = location.assignedAssets.filter(
-          (a: Asset) => a.id !== draggedAsset.id,
-        );
-        event.previousContainer.data.splice(event.previousIndex, 0, draggedAsset);
+    console.log('onEventDataMapperResolved dragstart', mapperPayload);
+    event.dataTransfer?.setData(
+      'application/drop-event-data',
+      JSON.stringify({
+        id: item.id,
+        assetName: item.label,
+      }),
+    );
+
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  onDragEnd(): void {
+    this.isDragging = false;
+    const mapperPayload = {
+      value: {
+        data: [
+          {
+            fieldName: 'is_drag_active',
+            originalValue: false,
+            value: false,
+            uom: {},
+            referenceData: {},
+          },
+        ],
       },
-    });
+    };
+
+    console.log('onEventDataMapperResolved dragend', mapperPayload);
   }
   removeAsset(location: Location, asset: Asset): void {
     location.assignedAssets = location.assignedAssets.filter((a: Asset) => a.id !== asset.id);

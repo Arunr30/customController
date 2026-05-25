@@ -1,77 +1,89 @@
-import { Component, inject, Injector, Input } from '@angular/core';
-import { AssetList } from './components/asset-list/asset-list';
+import { ChangeDetectorRef, Component, inject, Injector, Input } from '@angular/core';
 import { LocationDetails } from './components/location-details/location-details';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-
-import { DsResult, ExternalCoreHelper, ExternalCoreSimpleControl, RtOption, } from 'dist-controller';
+import { DsResult, ExternalCoreSimpleControl, RtOption } from 'dist-controller';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AssetList, LocationDetails, DragDropModule],
+  imports: [LocationDetails],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class AppComponent implements ExternalCoreSimpleControl {
-  containerHeight = '300px';
-  title = 'DEFAULT DEVUM';
-  titlePropertyName = '';
-
+  isDragging = false;
+  currentDraggedItem: any = null;
+  title = 'DEVUM ITEM';
   private injector = inject(Injector);
-  private externalHelper = new ExternalCoreHelper(this.injector);
-  constructor() {
+
+  constructor(private cdr : ChangeDetectorRef) {
     console.log('APP COMPONENT CREATED');
   }
-  @Input()
-  setControlInstance = (instance: any) => {
-    console.log('SET CONTROL INSTANCE');
-    console.log(instance);
-    console.log(this.externalHelper.getAppCode);
-  };
+  onDragStart(event: DragEvent): void {
+    const draggedItem = {
+      id: 'TITLE_1',
+      assetName: this.title,
+    };
 
+    console.log('Local Drag Start:', draggedItem);
 
-@Input()
-applyPropertyDefinitions = (properties: any) => {
+    event.dataTransfer?.setData('application/drop-event-data', JSON.stringify(draggedItem));
 
-  console.log('PROPERTY DEFINITIONS');
-
-  console.log(properties);
-
-  const titleProperty = properties.find(
-    (x:any) => x.controlAttributeName === 'title'
-  );
-  console.log(titleProperty);
-  if(titleProperty){
-     this.titlePropertyName = titleProperty.dsPropertyName;
+    this.onEventDataMapperResolved(
+      {
+        value: {
+          data: [
+            {
+              fieldName: 'dragged_item',
+              value: draggedItem,
+            },
+          ],
+        },
+      },
+      {} as RtOption<DsResult>,
+    );
   }
-  console.log(this.titlePropertyName);
-}
-  
-  
-  @Input()
-  applyConfigurationAttributes = (attributes: any) => {
-    console.log('CONFIG ATTRIBUTES');
-    console.log(attributes);
-    const titleAttr = attributes?.find((x: any) => x.name === 'title');
-    console.log(this.title);
-    if (titleAttr) {
-      this.title = titleAttr.value; 
-      console.log('TITLE UPDATED');
-      console.log(this.title);
-    }
-  };
-  
 
-  @Input()
-  onDatasourceResolved = (datasource: any) => {
-    console.log('DATASOURCE');
-    console.log(datasource);
-  };
+  onDragEnd(): void {
+    console.log('Local Drag End');
+
+    this.onEventDataMapperResolved(
+      {
+        value: {
+          data: [
+            {
+              fieldName: 'is_drag_active',
+              value: false,
+            },
+          ],
+        },
+      },
+      {} as RtOption<DsResult>,
+    );
+    this.cdr.detectChanges();
+  }
 
   @Input()
   onEventDataMapperResolved(eventDataMapper: any, _data: RtOption<DsResult>): void {
-    console.log('EVENT DATA MAPPER');
-    console.log(eventDataMapper);
-    console.log(_data);
+    console.log('DEVUM EVENT:', eventDataMapper, _data);
+    const dragState = _data.get?.data?.find((x: any) => x.fieldName === 'is_drag_active');
+    this.isDragging = dragState?.value;
+    console.log('isDragging updated:', this.isDragging);
+    this.cdr.detectChanges();
   }
+  
+  @Input()
+  setControlInstance = (instance: any) => {
+    console.log('SET CONTROL INSTANCE', instance);
+  };
+
+  @Input()
+  applyPropertyDefinitions = (_properties: any) => {};
+
+  @Input()
+  applyConfigurationAttributes = (_attributes: any) => {};
+
+  @Input()
+  onDatasourceResolved = (datasource: any) => {
+    console.log('DATASOURCE', datasource);
+  };
 }

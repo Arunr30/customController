@@ -48,3 +48,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 };
 
 
+
+
+/**
+ * 
+ * appCode: demo
+ * appCode: externalCoreHelper.getAppCode --> try.demo
+ */

@@ -1,9 +1,19 @@
+<!-- <h1>DEVUM DRAG SOURCE</h1> -->
+<!-- 
+<div
+  class="drag-source"
+  draggable="true"
+  (dragstart)="onDragStart($event)"
 
-  <h1>{{ title }}</h1>
-  <div cdkDropListGroup class="resource-layout">
+>
+  DRAG THIS ITEM
+</div> -->
 
-    <app-asset-list></app-asset-list>
+<div class="resource-layout">
 
-    <app-location-details></app-location-details>
+  <app-location-details
+    [isDragging]="isDragging"
+  >
+  </app-location-details>
 
-  </div>
+</div>

@@ -1,44 +1,44 @@
 <!-- location-details.html -->
 
+{{isDragging ? 'Dragging...' : 'Not Dragging'}}
+<div
+  class="test-drag-item"
+  draggable="true"
+  (dragstart)="onDragStart($event, {
+    id: 'TEST_1',
+    label: 'Dummy Asset'
+  })"
+  (dragend)="onDragEnd()"
+>
+  DRAG ME
+</div>
 <div class="location-container">
-  <div
-    class="location-row"
-    *ngFor="let location of locations"
-  >
-    <div class="location-card">
-      {{ location.locationName }}
-    </div>
-
-    <div
-      class="allocation-panel"
-      cdkDropList
-      [cdkDropListData]="location.assignedAssets"
-      (cdkDropListDropped)="drop($event, location)"
-    >
-      <div
-        class="asset-card"
-        *ngFor="let asset of location.assignedAssets"
-        cdkDrag
-        [cdkDragData]="asset"
-      >
-        <span>
-          {{ asset.assetName }}
-        </span>
-
-        <button
-          class="delete-btn"
-          (click)="removeAsset(location, asset)"
-        >
-          ×
-        </button>
+  @for (location of locations$ | async; track location.locationId) {
+    <div class="location-row">
+      <div class="location-card">
+        {{ location.locationName }}
       </div>
-
+  
       <div
-        class="drop-placeholder"
-        *ngIf="location.assignedAssets.length === 0"
-      >
-        DROP HERE
+  class="allocation-panel"
+  [ngClass] = "{ 'drag-active': isDragging }"
+  (drop)="drop($event, location)"
+  (dragover)="onDragOver($event)"
+>
+        @for (asset of location.assignedAssets; track asset.id) {
+          <div class="asset-card">
+            <span>
+              {{ asset.assetName }}
+            </span>
+          </div>
+        }
+  
+        @if (location.assignedAssets.length === 0) {
+          <div class="drop-placeholder">
+            DROP HERE
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 </div>
