@@ -15,62 +15,48 @@ export class AppComponent implements ExternalCoreSimpleControl {
   title = 'DEVUM ITEM';
   private injector = inject(Injector);
 
-  constructor(private cdr : ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef) {
     console.log('APP COMPONENT CREATED');
   }
   onDragStart(event: DragEvent): void {
-    const draggedItem = {
-      id: 'TITLE_1',
-      assetName: this.title,
-    };
-
-    console.log('Local Drag Start:', draggedItem);
+    const draggedItem = { id: 'TITLE_1', assetName: this.title };
 
     event.dataTransfer?.setData('application/drop-event-data', JSON.stringify(draggedItem));
 
     this.onEventDataMapperResolved(
+      { value: { data: [{ fieldName: 'dragged_item', value: draggedItem }] } },
       {
-        value: {
+        get: {
+         
           data: [
-            {
-              fieldName: 'dragged_item',
-              value: draggedItem,
-            },
+            { fieldName: 'dragged_item', value: draggedItem },
+            { fieldName: 'is_drag_active', value: true }, 
           ],
         },
-      },
-      {} as RtOption<DsResult>,
+      } as RtOption<DsResult>,
     );
   }
 
   onDragEnd(): void {
-    console.log('Local Drag End');
-
     this.onEventDataMapperResolved(
+      { value: { data: [{ fieldName: 'is_drag_active', value: false }] } },
       {
-        value: {
-          data: [
-            {
-              fieldName: 'is_drag_active',
-              value: false,
-            },
-          ],
+        get: {
+          data: [{ fieldName: 'is_drag_active', value: false }],
         },
-      },
-      {} as RtOption<DsResult>,
+      } as RtOption<DsResult>,
     );
-    this.cdr.detectChanges();
   }
 
   @Input()
-  onEventDataMapperResolved(eventDataMapper: any, _data: RtOption<DsResult>): void {
+  onEventDataMapperResolved = (eventDataMapper: any, _data: RtOption<DsResult>) => {
     console.log('DEVUM EVENT:', eventDataMapper, _data);
     const dragState = _data.get?.data?.find((x: any) => x.fieldName === 'is_drag_active');
     this.isDragging = dragState?.value;
     console.log('isDragging updated:', this.isDragging);
     this.cdr.detectChanges();
   }
-  
+
   @Input()
   setControlInstance = (instance: any) => {
     console.log('SET CONTROL INSTANCE', instance);
