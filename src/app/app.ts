@@ -13,18 +13,18 @@ export class AppComponent implements ExternalCoreSimpleControl {
   isDragging = false;
   currentDraggedItem: any = null;
   title = 'DEVUM ITEM';
-  private injector = inject(Injector);
+  // private injector = inject(Injector);
 
   constructor(private cdr: ChangeDetectorRef) {
     console.log('APP COMPONENT CREATED');
   }
   onDragStart(event: DragEvent): void {
     const draggedItem = { id: 'TITLE_1', assetName: this.title };
-
-    event.dataTransfer?.setData('application/drop-event-data', JSON.stringify(draggedItem));
-
+    event.dataTransfer?.setData('text/plain', JSON.stringify(draggedItem));
     this.onEventDataMapperResolved(
-      { value: { data: [{ fieldName: 'dragged_item', value: draggedItem }] } },
+     {},
+
+      // diff 
       {
         get: {
          
@@ -66,7 +66,9 @@ export class AppComponent implements ExternalCoreSimpleControl {
   applyPropertyDefinitions = (_properties: any) => {};
 
   @Input()
-  applyConfigurationAttributes = (_attributes: any) => {};
+  applyConfigurationAttributes = (_attributes: any) => {
+    
+  };
 
   @Input()
   onDatasourceResolved = (datasource: any) => {

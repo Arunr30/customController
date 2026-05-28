@@ -8,12 +8,10 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class LocationService {
-  private apiUrl = `${environment.apiUrl}/devum/demo/getLocationDetails`;
-
-  private mapApi = `${environment.apiUrl}/devum/demo/mapAssestsToLocation`;
-
-  private removeAssetApi = `${environment.apiUrl}/devum/demo/deleteAssetsService`;
-
+  private apiUrl = `${environment.apiUrl}/devum/theraphy/getLocationDetails`;
+  private mapApi = `${environment.apiUrl}/devum/theraphy/MapAssetToLocation`;
+  private removeAssetApi = `${environment.apiUrl}/devum/theraphy/deleteAssetsService`;
+  
   constructor(private http: HttpClient) {}
 
   getLocation(): Observable<Location[]> {

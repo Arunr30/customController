@@ -47,4 +47,22 @@
   border: 2px dashed #4caf50;
   background: rgba(76, 175, 80, 0.08);
 }
+
+
+.remove-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: red;
+}
+
+.remove-btn:hover {
+  transform: scale(1.1);
+}
+
+.drop-placeholder {
+  opacity: 0.3;
+}
  

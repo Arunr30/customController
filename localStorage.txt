@@ -134,3 +134,4 @@ export class LocationDetails implements OnInit {
     });
   }
 }
+

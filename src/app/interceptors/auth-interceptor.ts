@@ -2,9 +2,9 @@ import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let headers: any = {
-    orgcode: 'winterdev',
-    appcode: 'demo',
-    sitecode: 'BANG',
+    orgcode: 'vikiai-dev',
+    appcode: 'theraphy',
+    sitecode: 'DefaultSiteCode',
     identifiertype: 'external',
   };
 
@@ -12,32 +12,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.url.includes('getAssestsDetails')) {
     headers = {
       ...headers,
-      clientSecret: 'e8a87f57-9ffb-35ee-46c0-f13355b81e40',
+      clientSecret: '16e2f487-a15c-f760-b431-173fa6b0e3c7',
     };
   }
 
-  
   if (req.url.includes('getLocationDetails')) {
     console.log(req.url);
     headers = {
       ...headers,
-      clientSecret: 'cc02070a-b02d-f782-c750-8f2fef76a2e4',
+      clientSecret: '27ee440d-50e1-6667-d83f-55a94d9770f4',
     };
   }
 
-
-   if (req.url.includes('mapAssestsToLocation')) {
+  if (req.url.includes('MapAssetToLocation')) {
     console.log(req.url);
     headers = {
       ...headers,
-      clientSecret: 'e2db4b57-4ac8-cc22-8a31-cb86339f1459',
+      clientSecret: '9ee1b3de-e1ef-7e46-e91d-35816cd51ff9',
     };
   }
   if (req.url.includes('deleteAssetsService')) {
     console.log(req.url);
     headers = {
       ...headers,
-      clientSecret: '334b9aa3-0c56-6ef3-e8c2-880a9eb44b26',
+      clientSecret: '60a7c123-73f5-c6e6-f039-322c9a936b20',
     };
   }
 
@@ -47,11 +45,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(modifiedReq);
 };
 
-
-
-
 /**
- * 
+ *
  * appCode: demo
  * appCode: externalCoreHelper.getAppCode --> try.demo
  */

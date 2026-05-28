@@ -1,30 +1,35 @@
 <!-- location-details.html -->
 
-{{isDragging ? 'Dragging...' : 'Not Dragging'}}
+{{ isDragging ? 'Dragging...' : 'Not Dragging' }}
+
 <div
   class="test-drag-item"
   draggable="true"
-  (dragstart)="onDragStart($event, {
-    id: 'TEST_1',
-    label: 'Dummy Asset'
-  })"
+  (dragstart)="
+    onDragStart($event, {
+      id: 'TEST_1',
+      label: 'Dummy Asset',
+    })
+  "
   (dragend)="onDragEnd()"
 >
   DRAG ME
 </div>
+
 <div class="location-container">
   @for (location of locations$ | async; track location.locationId) {
     <div class="location-row">
       <div class="location-card">
         {{ location.locationName }}
       </div>
-  
+
       <div
-  class="allocation-panel"
-  [ngClass] = "{ 'drag-active': isDragging }"
-  (drop)="drop($event, location)"
-  (dragover)="onDragOver($event)"
->
+        class="allocation-panel"
+        [ngClass]="{ 'drag-active': isDragging }"
+        (drop)="drop($event, location)"
+        (dragover)="onDragOver($event)"
+        (dragenter)="onDragOver($event)"
+      >
         @for (asset of location.assignedAssets; track asset.id) {
           <div class="asset-card">
             <span>
@@ -32,11 +37,8 @@
             </span>
           </div>
         }
-  
         @if (location.assignedAssets.length === 0) {
-          <div class="drop-placeholder">
-            DROP HERE
-          </div>
+          <div class="drop-placeholder">DROP HERE</div>
         }
       </div>
     </div>
